@@ -1,35 +1,10 @@
-//#include <iostream>
-//#include <conio.h>
-//#include <fstream>
-//#include <string>
-//#include <sstream>
-//#include <Windows.h> // for COORD
-//#include <cstdlib>   // for rand() and srand()
-//#include <ctime>     // for time()
-//#include <algorithm> // for sort(),unique() etc
-//#include <vector>    // for vector
-//#include "C:\SDL2-devel-2.26.1-VC\include\SDL.h"		//for SDL GUI
-//#include "C:\SDL2-devel-2.26.1-VC\include\SDL_ttf.h"	//for SDL GUI Font
-//#include "C:\SDL2-devel-2.26.1-VC\include\SDL2_gfxPrimitives.h"	//for Advanced SDL GUI
-//#include<string>
-//#include<string.h>
-//#include "C:\SDL2-devel-2.26.1-VC\include\SDL.h"		//for SDL GUI
-//#include "C:\SDL2-devel-2.26.1-VC\include\SDL_ttf.h"	//for SDL GUI Font
-//#include "C:\SDL2-devel-2.26.1-VC\include\SDL2_gfxPrimitives.h"	//for Advanced SDL GUI
 #include"Text_Box.h"
-int Transparency = 120;
-//TTF_Font* font;
-//SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-//SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-//#include"Globals.h"
-//TTF_Font* font = TTF_OpenFont("arial.ttf", 100);;
-//SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-//SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
 #include"common.h"
-TTF_Font* font = TTF_OpenFont("arial.ttf", 100);;
+int Transparency = 120;
+
+TTF_Font* font = TTF_OpenFont("arial.ttf", 100);
 SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-SDL_Renderer* renderer;
+SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 class Button {
 protected:
 	Text_Box Main_Text_Box;
@@ -128,14 +103,10 @@ public:
 		}
 		Main_Text_Box.Display_Text_Box({ 0 }, 0);
 	}
-	void testfl() {
-		Main_Text_Box.get_text_for_Box();
-	}
 	COORD get_Position() const { return Main_Text_Box.get_Box_Position(); }
 	bool get_Button_Pushed() const { return Button_Pushed; }
 	bool get_Button_Hovered() const { return Button_Hovered; }
 	Size get_Button_Size() const { return Main_Text_Box.get_Box_Size(); }
-	//char get_char_of_button() const { return Main_Text_Box.get_text_for_Box().front(); }
 	string get_text_of_button() { return Main_Text_Box.get_text_for_Box(); }
 	Text_Box get_Main_Text_Box() const { return Main_Text_Box; }
 };
@@ -148,6 +119,7 @@ class Board {
 	bool Operator_Available[Num_of_Buttons]{ 0 };
 	vector<int> solution; // In solution i will append 1 for subtraction ,2 for addition, 3(*),4(droping digit) and 5 for append digit
 public:
+	bool Game_Mode;
 	Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(1) {}
 	void Set_Board(string Set_Board_Letters) {
 		Set_Board_Letters = "ATEHHDSEVTMFWLIA";		short intial_Position = 220;
@@ -522,13 +494,6 @@ public:
 };
 int main(int argc, char* argv[]) {
 	SDL_Init(SDL_INIT_VIDEO);
-	//window = SDL_CreateWindow("Pete's Pizza Party 6", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, Width, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	//TTF_Font* font = TTF_OpenFont("arial.ttf", 100);;
-	//SDL_Window* window;// = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-	//SDL_Renderer* renderer;// = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
 	TTF_Init();		font = TTF_OpenFont("arial.ttf", 100);//16  //max : 7332 /1000
 
 	if (font == NULL)
@@ -537,22 +502,87 @@ int main(int argc, char* argv[]) {
 	SDL_Event event;
 	Board Calculator_Game;
 	srand(time(nullptr)); // function to generate random number every time rand function call
-	Button Rotate_Button, Reset_Button, New_Game_Button;
-	Rotate_Button.Set_Button("Rotate", { 255,255,255,255 }, { 23 + 15,507 }, { 99, 50 }, 40, { 48, 68, 193, 255 }, 0);
-	Reset_Button.Set_Button("Reset", { 255,255,255,255 }, { 23 + 130,507 }, { 99, 50 }, 40, { 48, 68, 193, 255 }, 0);
-	New_Game_Button.Set_Button("New Game", { 255,255,255,255 }, { 23 + 244,507 }, { 140, 50 }, 40, { 255, 128, 0, 255 }, 0);
-	string Player_name;
+	Button Moves_Button, Chrono_Button, New_Game_Button;
+	Moves_Button.Set_Button("Moves Mode", { 255,255,255,255 }, { (Width - 170) / 2 - 95,(Height - 50) / 2 }, { 170, 50 }, 40, { 48, 68, 193, 255 }, 0);
+	Chrono_Button.Set_Button("Chrono Mode", { 255,255,255,255 }, { (Width - 170) / 2 + 95,(Height - 50) / 2 }, { 170, 50 }, 40, { 48, 68, 193, 255 }, 0);
 	Calculator_Game.New_Game();
 	int MouseX, MouseY;
 	bool Changes_Made = 1;
-	Rotate_Button.Display_Text_Button();
-	Reset_Button.Display_Text_Button();
-	New_Game_Button.Display_Text_Button();
+	Moves_Button.Display_Text_Button();
+	Chrono_Button.Display_Text_Button();
+	int Game_Mode = -1;
+	while (Game_Mode != 1 && Game_Mode != 0) {
+		while (SDL_PollEvent(&event)) {
+			if (event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE) {
+				TTF_CloseFont(font);
+				TTF_Quit();
+				SDL_DestroyRenderer(renderer);
+				SDL_DestroyWindow(window);
+				SDL_Quit();
+				exit(0);
+				return 0;
+			}
+			if (event.type == SDL_MOUSEMOTION)	//Mouse is hovering
+			{
+				SDL_GetMouseState(&MouseX, &MouseY);
+				Moves_Button.set_Button_Hovered(Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
+				Chrono_Button.set_Button_Hovered(Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
+				if (Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY) != Moves_Button.get_Button_Hovered())
+				{
+					Moves_Button.set_Button_Hovered(Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
+					Moves_Button.Display_Text_Button();
+				}
+				else if (Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY) != Chrono_Button.get_Button_Hovered())
+				{
+					Chrono_Button.set_Button_Hovered(Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
+					Chrono_Button.Display_Text_Button();
+				}
+			}
+			if (event.type == SDL_MOUSEBUTTONUP)	//mouse click on Button //RELEASED
+			{
+				SDL_GetMouseState(&MouseX, &MouseY);
+				if (Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
+					Moves_Button.set_Button_Pushed(0);
+					Moves_Button.Display_Text_Button();
+					Calculator_Game.Game_Mode = 0;
+					Game_Mode = 0;
+					break;
+				}
+				else if (Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
+					//RELEASED
+					Game_Mode = 1;
+					Calculator_Game.Game_Mode = 1;
+					Calculator_Game.Restart_level();
+					Chrono_Button.set_Button_Pushed(0);
+					Chrono_Button.Display_Text_Button();
+					break;
+				}
+			}
+			if (event.type == SDL_MOUSEBUTTONDOWN) {	//mouse click on Button
+
+				if (Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
+					Moves_Button.set_Button_Pushed(!Moves_Button.get_Button_Pushed());
+					Moves_Button.Display_Text_Button();
+					break;
+				}
+				if (Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
+					Chrono_Button.set_Button_Pushed(!Chrono_Button.get_Button_Pushed());
+					Chrono_Button.Display_Text_Button();
+					break;
+				}
+			}
+		}
+		SDL_SetRenderDrawColor(renderer, 225, 190, 190, 50);
+		SDL_RenderClear(renderer);
+		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+		Chrono_Button.Display_Button(0);
+		Moves_Button.Display_Button(0);
+		SDL_RenderPresent(renderer);
+	}
 	while (true) {
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE) {
-				//SDL_DestroyTexture(buttonTextTexture);
-				//SDL_FreeSurface(buttonTextSurface);
 				Calculator_Game.~Board();
 				TTF_CloseFont(font);
 				TTF_Quit();
@@ -569,17 +599,17 @@ int main(int argc, char* argv[]) {
 				//Rotate_Button.set_Button_Hovered(Rotate_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
 				//Reset_Button.set_Button_Hovered(Reset_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
 				//New_Game_Button.set_Button_Hovered(New_Game_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
-				if (Rotate_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY) != Rotate_Button.get_Button_Hovered())
+				if (Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY) != Moves_Button.get_Button_Hovered())
 				{
 					Changes_Made = 1;
-					Rotate_Button.set_Button_Hovered(Rotate_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
-					Rotate_Button.Display_Text_Button();
+					Moves_Button.set_Button_Hovered(Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
+					Moves_Button.Display_Text_Button();
 				}
-				else if (Reset_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY) != Reset_Button.get_Button_Hovered())
+				else if (Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY) != Chrono_Button.get_Button_Hovered())
 				{
 					Changes_Made = 1;
-					Reset_Button.set_Button_Hovered(Reset_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
-					Reset_Button.Display_Text_Button();
+					Chrono_Button.set_Button_Hovered(Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
+					Chrono_Button.Display_Text_Button();
 				}
 				else if (New_Game_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY) != New_Game_Button.get_Button_Hovered())
 				{
@@ -594,19 +624,19 @@ int main(int argc, char* argv[]) {
 				if (Calculator_Game.Check_for_Letters_input(MouseX, MouseY, 0)) {
 					break;
 				}
-				else if (Rotate_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
+				else if (Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
 					//RELEASED
 					//Calculator_Game.Board_rotate();
-					Rotate_Button.set_Button_Pushed(0);
-					Rotate_Button.Display_Text_Button();
+					Moves_Button.set_Button_Pushed(0);
+					Moves_Button.Display_Text_Button();
 					Changes_Made = 1;
 					break;
 				}
-				else if (Reset_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
+				else if (Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
 					//RELEASED
 					Calculator_Game.Restart_level();
-					Reset_Button.set_Button_Pushed(0);
-					Reset_Button.Display_Text_Button();
+					Chrono_Button.set_Button_Pushed(0);
+					Chrono_Button.Display_Text_Button();
 					Changes_Made = 1;
 					break;
 				}
@@ -624,15 +654,15 @@ int main(int argc, char* argv[]) {
 				if (Calculator_Game.Check_for_Letters_input(MouseX, MouseY, 1)) {
 					break;
 				}
-				if (Rotate_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
-					Rotate_Button.set_Button_Pushed(!Rotate_Button.get_Button_Pushed());
-					Rotate_Button.Display_Text_Button();
+				if (Moves_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
+					Moves_Button.set_Button_Pushed(!Moves_Button.get_Button_Pushed());
+					Moves_Button.Display_Text_Button();
 					Changes_Made = 1;
 					break;
 				}
-				if (Reset_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
-					Reset_Button.set_Button_Pushed(!Reset_Button.get_Button_Pushed());
-					Reset_Button.Display_Text_Button();
+				if (Chrono_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
+					Chrono_Button.set_Button_Pushed(!Chrono_Button.get_Button_Pushed());
+					Chrono_Button.Display_Text_Button();
 					Changes_Made = 1;
 					break;
 				}
@@ -647,8 +677,6 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(renderer, 225, 190, 190, 50);
 		SDL_RenderClear(renderer);
 		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-		//Reset_Button.Display_Text_Button();
-		//New_Game_Button.Display_Text_Button();
 
 		Calculator_Game.Display_Board();
 		SDL_RenderPresent(renderer);
