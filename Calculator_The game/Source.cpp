@@ -1,106 +1,35 @@
-#include <iostream>
-#include <conio.h>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <Windows.h> // for COORD
-#include <cstdlib>   // for rand() and srand()
-#include <ctime>     // for time()
-#include <algorithm> // for sort(),unique() etc
-#include <vector>    // for vector
-#include "C:\SDL2-devel-2.26.1-VC\include\SDL.h"		//for SDL GUI
-#include "C:\SDL2-devel-2.26.1-VC\include\SDL_ttf.h"	//for SDL GUI Font
-#include "C:\SDL2-devel-2.26.1-VC\include\SDL2_gfxPrimitives.h"	//for Advanced SDL GUI
-#include<string>
+//#include <iostream>
+//#include <conio.h>
+//#include <fstream>
+//#include <string>
+//#include <sstream>
+//#include <Windows.h> // for COORD
+//#include <cstdlib>   // for rand() and srand()
+//#include <ctime>     // for time()
+//#include <algorithm> // for sort(),unique() etc
+//#include <vector>    // for vector
+//#include "C:\SDL2-devel-2.26.1-VC\include\SDL.h"		//for SDL GUI
+//#include "C:\SDL2-devel-2.26.1-VC\include\SDL_ttf.h"	//for SDL GUI Font
+//#include "C:\SDL2-devel-2.26.1-VC\include\SDL2_gfxPrimitives.h"	//for Advanced SDL GUI
+//#include<string>
+//#include<string.h>
+//#include "C:\SDL2-devel-2.26.1-VC\include\SDL.h"		//for SDL GUI
+//#include "C:\SDL2-devel-2.26.1-VC\include\SDL_ttf.h"	//for SDL GUI Font
+//#include "C:\SDL2-devel-2.26.1-VC\include\SDL2_gfxPrimitives.h"	//for Advanced SDL GUI
+#include"Text_Box.h"
 int Transparency = 120;
-#define Width 405
-#define Height 571
+//TTF_Font* font;
+//SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+//SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+//#include"Globals.h"
+//TTF_Font* font = TTF_OpenFont("arial.ttf", 100);;
+//SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+//SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+#include"common.h"
+TTF_Font* font = TTF_OpenFont("arial.ttf", 100);;
 SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-TTF_Font* font;
-using namespace std;
-struct Size {
-	int height;
-	int width;
-	Size() : height(0), width(0) {}
-	Size(int h, int w) : height(h), width(w) {}
-};
-class Text_Box {
-protected:
-	string text_for_Box{};
-	COORD Position{};
-	SDL_Surface* buttonTextSurface{};
-	SDL_Texture* buttonTextTexture{};
-	SDL_Color Box_Color;
-	Size Box_Size;
-public:
-	static double scale;
-	static int Rounding_Radius;
-	SDL_Rect Box;
-	void set_Box_Text_Char(char Text, int Font_Size, SDL_Color Text_Color, int style) {
-		if (buttonTextSurface)
-			SDL_FreeSurface(buttonTextSurface);
-		if (buttonTextTexture)
-			SDL_DestroyTexture(buttonTextTexture);
-		text_for_Box = "";
-		text_for_Box = Text;
-		TTF_SetFontSize(font, Font_Size);
-		TTF_SetFontStyle(font, style);
-		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-		buttonTextSurface = TTF_RenderText_Blended(font, text_for_Box.c_str(), Text_Color); //text Color
-		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-		buttonTextTexture = SDL_CreateTextureFromSurface(renderer, buttonTextSurface);
-		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-	}
-	void set_Box_Text(const char* Text, int Font_Size, SDL_Color Text_Color, int style) {
-		if (buttonTextSurface)
-			SDL_FreeSurface(buttonTextSurface);
-		if (buttonTextTexture)
-			SDL_DestroyTexture(buttonTextTexture);
-		text_for_Box = Text;
-		TTF_SetFontSize(font, Font_Size);
-		TTF_SetFontStyle(font, style);
-		buttonTextSurface = TTF_RenderText_Blended(font, text_for_Box.c_str(), Text_Color); //text Color
-		buttonTextTexture = SDL_CreateTextureFromSurface(renderer, buttonTextSurface);
-	}
-	void set_Text_Box(const char* Text, int Font_Size, SDL_Color Text_Color, COORD Position, Size Box_Size, SDL_Color Box_Color, bool BOLD) {
-		this->Position = Position;
-		this->Box_Size = Box_Size;		Box = { Position.X, Position.Y, Box_Size.height, Box_Size.width };
-		this->Box_Color = Box_Color;
-		set_Box_Text(Text, Font_Size, Text_Color, BOLD);
-	}
-	void set_Box_Color(SDL_Color Box_Color1) { Box_Color = Box_Color1; }
-	void set_Box_Size(Size New_Size) { Box_Size = New_Size; }
-	void Display_Text_Box(SDL_Color newcolor, bool usenewcolor_instead_boxcolor) const {
-		if (usenewcolor_instead_boxcolor)
-			roundedBoxRGBA(renderer, Box.x, Box.y, Box.x + Box.w, Box.y + Box.h, Rounding_Radius, newcolor.r, newcolor.g, newcolor.b, 255);
-		else
-			roundedBoxRGBA(renderer, Box.x, Box.y, Box.x + Box.w, Box.y + Box.h, Rounding_Radius, Box_Color.r, Box_Color.g, Box_Color.b, 255);
-		//scale = .65;//1.5
-		int w, h;
-		SDL_QueryTexture(buttonTextTexture, nullptr, nullptr, &w, &h);
-		double x, y;
-		x = Box.x + (Box.w - double(w) * scale) / 2;
-		y = Box.y + (Box.h - double(h) * scale) / 2;
-		SDL_Rect dst;
-		dst = { int(x), int(y), int(w * scale),int(h * scale) };
-		SDL_RenderCopy(renderer, buttonTextTexture, nullptr, &dst);
-	}
-	string get_text_for_Box() const { return text_for_Box; }
-	SDL_Rect get_Main_Box() const { return Box; }
-	SDL_Color get_Box_Color() const { return Box_Color; }
-	Size get_Box_Size() const { return Box_Size; }
-	COORD get_Box_Position() const { return Position; }
-	SDL_Surface* get_buttonTextSurface() const { return buttonTextSurface; }
-	SDL_Texture* get_buttonTextTexture() const { return buttonTextTexture; }
-	~Text_Box() {
-		//SDL_DestroyTexture(buttonTextTexture);
-		//SDL_FreeSurface(buttonTextSurface);
-		//cout << "Called Text des\n";
-	}
-};
-double Text_Box::scale = 0.65;
-int Text_Box::Rounding_Radius = 20;
+SDL_Renderer* renderer;
 class Button {
 protected:
 	Text_Box Main_Text_Box;
@@ -138,7 +67,13 @@ public:
 		else
 			roundedBoxRGBA(renderer, Main_Text_Box.get_Box_Position().X, Main_Text_Box.get_Box_Position().Y, Shadow_box.x + Main_Text_Box.get_Box_Size().height, Shadow_box.y + Main_Text_Box.get_Box_Size().width, 20, 75, 75, 75, Transparency);
 	}
-	void Display_Button(bool Makes_a_Word) {
+	void Display_Button(bool Blocked) {
+		if (Blocked) {
+			//Text_Box Temp;
+			Main_Text_Box.set_Box_Text("", 0, { 0 }, 0);
+			Main_Text_Box.Display_Text_Box({ 176, 152, 152, 255 }, 1);
+			return;
+		}
 		if (Button_Pushed) {
 			Main_Text_Box.Box =
 			{ Main_Text_Box.get_Box_Position().X + 5, Main_Text_Box.get_Box_Position().Y + 5, Main_Text_Box.get_Box_Size().height - Shadow_offset, Main_Text_Box.get_Box_Size().width - Shadow_offset };
@@ -193,53 +128,43 @@ public:
 		}
 		Main_Text_Box.Display_Text_Box({ 0 }, 0);
 	}
-
+	void testfl() {
+		Main_Text_Box.get_text_for_Box();
+	}
 	COORD get_Position() const { return Main_Text_Box.get_Box_Position(); }
 	bool get_Button_Pushed() const { return Button_Pushed; }
 	bool get_Button_Hovered() const { return Button_Hovered; }
 	Size get_Button_Size() const { return Main_Text_Box.get_Box_Size(); }
-	char get_char_of_button() const { return Main_Text_Box.get_text_for_Box().front(); }
-	string get_text_of_button() const { return Main_Text_Box.get_text_for_Box(); }
+	//char get_char_of_button() const { return Main_Text_Box.get_text_for_Box().front(); }
+	string get_text_of_button() { return Main_Text_Box.get_text_for_Box(); }
 	Text_Box get_Main_Text_Box() const { return Main_Text_Box; }
 };
 Text_Box Current_Number_Board, Score_Board, Moves_Board, emptyButton1, emptyButton2;
-class Players
-{
-protected:
-	char Player_Name[50] = "";			int High_score{};		bool isActive{ false };
-	int No_of_Player_Profiles{};
-public:
-	int get_high_score() const { return High_score; }
-	void update_high_Score(int new_high_score) { High_score = High_score + (new_high_score - High_score); }
-	char* get_Player_Name() { return Player_Name; }
-	bool get_IsActive_Status()const { return isActive; }
-
-};
 #define Num_of_Buttons 7
 class Board {
-	Button Alphabets[Num_of_Buttons]; //using 1D array as it faster than 2D
+	Button Calculator_buttons[Num_of_Buttons]; //using 1D array as it faster than 2D
 	int level;
 	int Starting_Number, Current_number, Final_Number, Moves_Count, Moves;
-	bool Operator_Available[5]{ 0 };
+	bool Operator_Available[Num_of_Buttons]{ 0 };
 	vector<int> solution; // In solution i will append 1 for subtraction ,2 for addition, 3(*),4(droping digit) and 5 for append digit
 public:
-	Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(4) {}
+	Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(1) {}
 	void Set_Board(string Set_Board_Letters) {
 		Set_Board_Letters = "ATEHHDSEVTMFWLIA";		short intial_Position = 220;
 		for (short i = 0; i < Num_of_Buttons; i++) {
 			string temp(1, Set_Board_Letters[i]);
-			Alphabets[i].Set_Button(temp.c_str(), { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + intial_Position)) }, { 100,100 }, 100, { 0, 0, 0, 255 }, 0);
+			Calculator_buttons[i].Set_Button(temp.c_str(), { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + intial_Position)) }, { 100,100 }, 100, { 0, 0, 0, 255 }, 0);
 		}
 		short i = 0;
 		SDL_Color Buttons_Color = { 19 ,19 ,19 };
-		/*0*/Alphabets[i].Set_Button("-", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, Buttons_Color, 0);		i++;
-		/*1*/Alphabets[i].Set_Button("+", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, Buttons_Color, 0);		i++;
-		/*2*/Alphabets[i].Set_Button("x", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, Buttons_Color, 0);		i++;
-		/*3*/Alphabets[i].Set_Button("<<", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 251, 153, 2, 255 }, 0);		i++;
-		/*4*/Alphabets[i].Set_Button(">>", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 251, 153, 2, 255 }, 0);		i++;
-		/*5*/Alphabets[i].Set_Button("Hint", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 46, 228, 52, 255 }, 0);		i++;
+		/*0*/Calculator_buttons[i].Set_Button("-", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, Buttons_Color, 0);		i++;
+		/*1*/Calculator_buttons[i].Set_Button("+", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, Buttons_Color, 0);		i++;
+		/*2*/Calculator_buttons[i].Set_Button("x", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, Buttons_Color, 0);		i++;
+		/*3*/Calculator_buttons[i].Set_Button("<<", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 251, 153, 2, 255 }, 0);		i++;
+		/*4*/Calculator_buttons[i].Set_Button(">>", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 251, 153, 2, 255 }, 0);		i++;
+		/*5*/Calculator_buttons[i].Set_Button("Hint", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 46, 228, 52, 255 }, 0);		i++;
 		emptyButton1.set_Text_Box("", 0, { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, { 176, 152, 152, 255 }, 0); i++;
-		/*6*/Alphabets[6].Set_Button("CLR", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 255,0, 0, 255 }, 0); i++;
+		/*6*/Calculator_buttons[6].Set_Button("CLR", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 255,0, 0, 255 }, 0); i++;
 		emptyButton2.set_Text_Box("", 0, { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, { 176, 152, 152, 255 }, 0); i++;
 		Initialize_Level_Values();
 		Show_Solution();
@@ -262,7 +187,7 @@ public:
 	}
 	void Check_for_Hovering(int x, int y) {
 		for (short i = 0; i < Num_of_Buttons; i++)
-			Alphabets[i].set_Button_Hovered(Alphabets[i].Check_if_Mouse_in_Button_Area(x, y));
+			Calculator_buttons[i].set_Button_Hovered(Calculator_buttons[i].Check_if_Mouse_in_Button_Area(x, y));
 	}
 	void Reset_Pressed_Letters() {
 		Display_Board();
@@ -275,6 +200,8 @@ public:
 		srand(time(nullptr)); // function to generate random number every time rand function call
 		Current_number = rand() % 11; // Assigning random number to starting variable
 		Starting_Number = Current_number;  //Saving the starting number for level restart/fail
+		Operator_Available[5] = 1;
+		Operator_Available[6] = 1;
 		int final_number = Current_number;
 		int Sub = rand() % 2 + 1;  // value which will use for subtraction
 		int Add = rand() % 11 + 1; // value which will use for addition
@@ -283,17 +210,21 @@ public:
 		Moves = Moves_Count;
 		int finish_number_solution = Current_number;
 		string tostring = "-" + to_string(Sub);
-		Alphabets[0].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+		Calculator_buttons[0].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		tostring = "+" + to_string(Add);
-		Alphabets[1].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+		Calculator_buttons[1].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		if (level < 6) // for level 1-5
 		{
-			Operator_Available[0] = 1;
-			Operator_Available[1] = 1;
+			Operator_Available[0] = 1; //-
+			Operator_Available[1] = 1; //+
+			Operator_Available[2] = 0; //*
+			Operator_Available[3] = 0; //<<
+			Operator_Available[4] = 0; //>>
 			if (temp1 > 3)
 			{
 				temp1 = 3;
 				Moves_Count = temp1;
+				Moves = Moves_Count;
 			}
 			while (temp1 > 0)
 			{
@@ -316,20 +247,27 @@ public:
 			return;
 		}
 
+		Calculator_buttons[3].set_Text_of_button("<<", { 255,255,255 }, 0);
 		int Mul = rand() % 5 + 2;  // value which will use for multiplication
 		tostring = "x" + to_string(Mul);
-		Alphabets[2].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
-		//Alphabets[3].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+		Calculator_buttons[2].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+
 		int Append = rand() % 10;     // value which will use for append at last
 		tostring = ">>" + to_string(Append);
 
-		Alphabets[4].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+		Calculator_buttons[4].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		solution.clear();
 
 		if (level < 11) // for level 6-10
 		{
+			Operator_Available[0] = 1; //-
+			Operator_Available[1] = 1; //+
+			Operator_Available[2] = 1; //*
+			Operator_Available[3] = 0; //<<
+			Operator_Available[4] = 0; //>>
 			temp1 = 3;
 			Moves_Count = temp1;
+			Moves = Moves_Count;
 			const int size = 3;
 			int arr[size];
 
@@ -368,11 +306,83 @@ public:
 			}
 			Final_Number = final_number;
 		}
+
+
+		else if (level < 16) // for level 11-15
+		{
+			Operator_Available[0] = 1; //-
+			Operator_Available[1] = 1; //+
+			Operator_Available[2] = 1; //*
+			Operator_Available[3] = 1; //<<
+			Operator_Available[4] = 1; //>>
+			temp1 = 5;
+			Moves_Count = temp1;
+			Moves = Moves_Count;
+			const int size = 5;
+			int arr[size];
+
+			for (int i = 0; i < size; i++) // to make unique solution
+			{
+				int applying_rules = rand() % 5 + 1;
+				arr[i] = applying_rules;
+
+				for (int j = 0; j < i; j++)
+				{
+					while (arr[i] == arr[j])
+					{
+						applying_rules = rand() % 5 + 1;
+						arr[i] = applying_rules;
+						j = 0;
+					}
+				}
+			}
+			for (int i = 0; i < temp1; i++) // if <,> these operaor came next to each other change them 
+			{
+				if (arr[i] == 4 || arr[i] == 5)
+				{
+					if (arr[i + 1] == 5 || arr[i + 1] == 4)
+					{
+						arr[i] = 3;
+					}
+				}
+			}
+			for (int i = 0; i < temp1; i++)
+			{
+				if (arr[i] == 1)
+				{
+					solution.push_back(1);
+					final_number -= Sub; // subtracting random generated number
+				}
+				else if (arr[i] == 2)
+				{
+					solution.push_back(2);
+					final_number += Add; // adding random generated number
+				}
+				else if (arr[i] == 3)
+				{
+					solution.push_back(3);
+					final_number *= Mul; // multiplying random generated number
+				}
+				else if (arr[i] == 4)
+				{
+					solution.push_back(4);
+					final_number = (final_number / 10); // dropping the last digit
+				}
+				else
+				{
+					solution.push_back(5);
+					final_number = final_number * 10 + Append; // appending random generated number
+				}
+			}
+			Final_Number = final_number;
+		}
 	}
-	void Game_Level() {	}
 	void Display_Board() {
 		for (int i = 0; i < Num_of_Buttons; i++)
-			Alphabets[i].Display_Button(0);
+			if (Operator_Available[i] == 0)
+				Calculator_buttons[i].Display_Button(1); //blocked, dont show
+			else
+				Calculator_buttons[i].Display_Button(0); //allowed
 		emptyButton1.Display_Text_Box({ 0 }, 0);
 		emptyButton2.Display_Text_Box({ 0 }, 0);
 		Display_Level();
@@ -382,21 +392,37 @@ public:
 	}
 	bool Check_for_Letters_input(int x, int y, bool Mousedown_or_up) {//1 for down, 0 for up
 		for (int i = 0; i < Num_of_Buttons; i++)
-			if (Alphabets[i].Check_if_Mouse_in_Button_Area(x, y))
+			if (Calculator_buttons[i].Check_if_Mouse_in_Button_Area(x, y))
 			{
 				if (Mousedown_or_up)
-					Alphabets[i].set_Button_Pushed(1);
+					Calculator_buttons[i].set_Button_Pushed(1);
 				else
-					Alphabets[i].set_Button_Pushed(0);
-				if (Alphabets[i].get_Button_Pushed()) {}
+					Calculator_buttons[i].set_Button_Pushed(0);
+				if (Calculator_buttons[i].get_Button_Pushed()) {}
 				else {	//if button released
-					cout << "Operator  " << Alphabets[i].get_text_of_button() << endl;
 					if (i == 6) {
+						cout << "Reset level\n";
 						Restart_level();
 						return 1;
 					}
-					if (Operator_Available[i] || 1) {
-						string suffix = Alphabets[i].get_text_of_button().substr(1);
+					if (i == 5) {
+						cout << "Hint : \'";
+						if (solution[Moves - Moves_Count] == 1)
+							cout << "-";
+						else if (solution[Moves - Moves_Count] == 2)
+							cout << "+";
+						else if (solution[Moves - Moves_Count] == 3)
+							cout << "*";
+						else if (solution[Moves - Moves_Count] == 4)
+							cout << "<"; // for drop digit
+						else if (solution[Moves - Moves_Count] == 5)
+							cout << ">"; // for append digit
+						cout << "\'\n";
+						return 1;
+					}
+					if (Operator_Available[i]) {
+						cout << "Operator  " << Calculator_buttons[i].get_text_of_button() << endl;
+						string suffix = Calculator_buttons[i].get_text_of_button().substr(1);
 						if (i == 0) {
 							//cout << "got" << suffix << endl;
 							Current_number -= stoi(suffix);
@@ -410,28 +436,30 @@ public:
 							Current_number *= stoi(suffix);
 						}
 						if (i == 3) { //<<
-							suffix = Alphabets[i].get_text_of_button().substr(2);
-							//cout << "got" << suffix << endl;
+							suffix = Calculator_buttons[i].get_text_of_button().substr(2);
 							Current_number /= 10;
 						}
 						if (i == 4) { //>>
-							suffix = Alphabets[i].get_text_of_button().substr(2);
-							//cout << "got" << suffix << endl;
+							suffix = Calculator_buttons[i].get_text_of_button().substr(2);
 							Current_number = (Current_number * 10) + stoi(suffix); // appending the digit at last
-						}
-						if (i == 5) {
-							//cout << "got" << suffix << endl;
-							cout << "Hint " << solution[Moves-Moves_Count] << endl;
-							return 1;
 						}
 						Moves_Count--;
 						if (Current_number == Final_Number)
 						{
-							Display_Current_Number("Level Up", 140, 1);
+							if (level == 15) {
+								Display_Current_Number("Game Complete", 90, 1);
+								SDL_RenderPresent(renderer);
+								solution.clear();
+								SDL_Delay(950);
+								level = 1; 	Initialize_Level_Values(); Show_Solution();
+								return 1;
+							}
+							else
+								Display_Current_Number("Level Up", 140, 1);
 							SDL_RenderPresent(renderer);
 							cout << "lvl up\n";
-							SDL_Delay(950);
 							level++; solution.clear();
+							SDL_Delay(950);
 							Initialize_Level_Values();
 							Show_Solution();
 						}
@@ -444,8 +472,6 @@ public:
 							Restart_level();
 						}
 					}
-
-
 				}
 				return 1;
 			}
@@ -488,32 +514,6 @@ public:
 		Moves_Board.set_Text_Box(("Target " + to_string(Final_Number)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
 		Moves_Board.Display_Text_Box({ 0 }, 0);
 	}
-	void Board_rotate() {
-		char temp[4];
-		for (size_t i = 0; i < 4; i++)
-			temp[i] = Alphabets[i].get_char_of_button();
-		Alphabets[3].set_char_of_button(Alphabets[0].get_char_of_button());
-		Alphabets[0].set_char_of_button(Alphabets[12].get_char_of_button());
-		Alphabets[1].set_char_of_button(Alphabets[8].get_char_of_button());
-		Alphabets[2].set_char_of_button(Alphabets[4].get_char_of_button());
-
-		Alphabets[12].set_char_of_button(Alphabets[15].get_char_of_button());
-		Alphabets[8].set_char_of_button(Alphabets[14].get_char_of_button());
-		Alphabets[4].set_char_of_button(Alphabets[13].get_char_of_button());
-
-		{char temp_Inner_Sq = Alphabets[5].get_char_of_button();
-		Alphabets[5].set_char_of_button(Alphabets[9].get_char_of_button());
-		Alphabets[9].set_char_of_button(Alphabets[10].get_char_of_button());
-		Alphabets[10].set_char_of_button(Alphabets[6].get_char_of_button());
-		Alphabets[6].set_char_of_button(temp_Inner_Sq);
-		}
-		Alphabets[15].set_char_of_button(temp[3]);
-		Alphabets[13].set_char_of_button(Alphabets[11].get_char_of_button());
-		Alphabets[14].set_char_of_button(Alphabets[7].get_char_of_button());
-		Alphabets[11].set_char_of_button(temp[2]);
-		Alphabets[7].set_char_of_button(temp[1]);
-
-	}
 	void New_Game() {
 		Restart_level();
 		Set_Board("ATEHHDSEVTMFWLIA");
@@ -522,20 +522,27 @@ public:
 };
 int main(int argc, char* argv[]) {
 	SDL_Init(SDL_INIT_VIDEO);
+	//window = SDL_CreateWindow("Pete's Pizza Party 6", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, Width, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	//TTF_Font* font = TTF_OpenFont("arial.ttf", 100);;
+	//SDL_Window* window;// = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+	//SDL_Renderer* renderer;// = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
 	TTF_Init();		font = TTF_OpenFont("arial.ttf", 100);//16  //max : 7332 /1000
+
 	if (font == NULL)
 		cout << "ERROR!!!\n(Arial.ttf) Font Not Found - unable to render text" << endl;
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_Event event;
-	Board Boggle_Game;
+	Board Calculator_Game;
 	srand(time(nullptr)); // function to generate random number every time rand function call
 	Button Rotate_Button, Reset_Button, New_Game_Button;
 	Rotate_Button.Set_Button("Rotate", { 255,255,255,255 }, { 23 + 15,507 }, { 99, 50 }, 40, { 48, 68, 193, 255 }, 0);
 	Reset_Button.Set_Button("Reset", { 255,255,255,255 }, { 23 + 130,507 }, { 99, 50 }, 40, { 48, 68, 193, 255 }, 0);
 	New_Game_Button.Set_Button("New Game", { 255,255,255,255 }, { 23 + 244,507 }, { 140, 50 }, 40, { 255, 128, 0, 255 }, 0);
-	Players Game_Player;
 	string Player_name;
-	Boggle_Game.New_Game();
+	Calculator_Game.New_Game();
 	int MouseX, MouseY;
 	bool Changes_Made = 1;
 	Rotate_Button.Display_Text_Button();
@@ -546,7 +553,7 @@ int main(int argc, char* argv[]) {
 			if (event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE) {
 				//SDL_DestroyTexture(buttonTextTexture);
 				//SDL_FreeSurface(buttonTextSurface);
-				Boggle_Game.~Board();
+				Calculator_Game.~Board();
 				TTF_CloseFont(font);
 				TTF_Quit();
 				SDL_DestroyRenderer(renderer);
@@ -558,7 +565,7 @@ int main(int argc, char* argv[]) {
 			if (event.type == SDL_MOUSEMOTION)	//Mouse is hovering
 			{
 				SDL_GetMouseState(&MouseX, &MouseY);
-				Boggle_Game.Check_for_Hovering(MouseX, MouseY);
+				Calculator_Game.Check_for_Hovering(MouseX, MouseY);
 				//Rotate_Button.set_Button_Hovered(Rotate_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
 				//Reset_Button.set_Button_Hovered(Reset_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
 				//New_Game_Button.set_Button_Hovered(New_Game_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY));
@@ -584,12 +591,12 @@ int main(int argc, char* argv[]) {
 			if (event.type == SDL_MOUSEBUTTONUP)	//mouse click on Button
 			{
 				SDL_GetMouseState(&MouseX, &MouseY);
-				if (Boggle_Game.Check_for_Letters_input(MouseX, MouseY, 0)) {
+				if (Calculator_Game.Check_for_Letters_input(MouseX, MouseY, 0)) {
 					break;
 				}
 				else if (Rotate_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
 					//RELEASED
-					Boggle_Game.Board_rotate();
+					//Calculator_Game.Board_rotate();
 					Rotate_Button.set_Button_Pushed(0);
 					Rotate_Button.Display_Text_Button();
 					Changes_Made = 1;
@@ -597,7 +604,7 @@ int main(int argc, char* argv[]) {
 				}
 				else if (Reset_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
 					//RELEASED
-					Boggle_Game.Restart_level();
+					Calculator_Game.Restart_level();
 					Reset_Button.set_Button_Pushed(0);
 					Reset_Button.Display_Text_Button();
 					Changes_Made = 1;
@@ -605,7 +612,7 @@ int main(int argc, char* argv[]) {
 				}
 				else if (New_Game_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
 					//RELEASED
-					//Boggle_Game.New_Game();
+					//Calculator_Game.New_Game();
 					New_Game_Button.set_Button_Pushed(0);
 					New_Game_Button.Display_Text_Button();
 					Changes_Made = 1;
@@ -614,7 +621,7 @@ int main(int argc, char* argv[]) {
 			}
 			if (event.type == SDL_MOUSEBUTTONDOWN) {	//mouse click on Button
 				SDL_GetMouseState(&MouseX, &MouseY);
-				if (Boggle_Game.Check_for_Letters_input(MouseX, MouseY, 1)) {
+				if (Calculator_Game.Check_for_Letters_input(MouseX, MouseY, 1)) {
 					break;
 				}
 				if (Rotate_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
@@ -643,7 +650,7 @@ int main(int argc, char* argv[]) {
 		//Reset_Button.Display_Text_Button();
 		//New_Game_Button.Display_Text_Button();
 
-		Boggle_Game.Display_Board();
+		Calculator_Game.Display_Board();
 		SDL_RenderPresent(renderer);
 	}
 }
