@@ -15,7 +15,6 @@
 int Transparency = 120;
 #define Width 450
 #define Height 571
-#define Num_of_Buttons 571
 SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 450/*width*/, 571, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 TTF_Font* font;
@@ -72,7 +71,6 @@ public:
 	}
 	void set_Box_Color(SDL_Color Box_Color1) { Box_Color = Box_Color1; }
 	void set_Box_Size(Size New_Size) { Box_Size = New_Size; }
-
 	void Display_Text_Box(SDL_Color newcolor, bool usenewcolor_instead_boxcolor) const {
 		if (usenewcolor_instead_boxcolor)
 			roundedBoxRGBA(renderer, Box.x, Box.y, Box.x + Box.w, Box.y + Box.h, Rounding_Radius, newcolor.r, newcolor.g, newcolor.b, 255);
@@ -88,7 +86,6 @@ public:
 		dst = { int(x), int(y), int(w * scale),int(h * scale) };
 		SDL_RenderCopy(renderer, buttonTextTexture, nullptr, &dst);
 	}
-
 	string get_text_for_Box() const { return text_for_Box; }
 	SDL_Rect get_Main_Box() const { return Box; }
 	SDL_Color get_Box_Color() const { return Box_Color; }
@@ -118,9 +115,9 @@ public:
 		//char ch = &Alphabet;
 		Main_Text_Box.set_Box_Text_Char(Alphabet, 100, { 0, 0, 255 }, 1);
 	}
-	void set_Text_of_button(const char* Alphabet) {
+	void set_Text_of_button(const char* Alphabet, bool BOLD) {
 		//char ch = &Alphabet;
-		Main_Text_Box.set_Box_Text(Alphabet, 100, { 0, 0, 255 }, 1);
+		Main_Text_Box.set_Box_Text(Alphabet, 100, { 0, 0, 255 }, BOLD);
 	}
 	void set_Button_Color(SDL_Color newColor) { Main_Text_Box.set_Box_Color(newColor); }
 	void set_Button_Size(Size Button_Size) { this->Main_Text_Box.set_Box_Size(Button_Size); }
@@ -206,7 +203,7 @@ public:
 	string get_text_of_button() const { return Main_Text_Box.get_text_for_Box(); }
 	Text_Box get_Main_Text_Box() const { return Main_Text_Box; }
 };
-Text_Box Invalid_Word_Mess, Score_Board, Current_Word_Board;
+Text_Box Invalid_Word_Mess, Score_Board, Current_Word_Board, Moves_Board;
 class Players
 {
 protected:
@@ -219,70 +216,61 @@ public:
 	bool get_IsActive_Status()const { return isActive; }
 
 };
+#define Num_of_Buttons 16
 class Board {
-	Button Alphabets[16]; //using 1D array as it faster than 2D
-	int Score;
+	Button Alphabets[Num_of_Buttons]; //using 1D array as it faster than 2D
 	string Current_Word;
-	//bool Word_Made;
 	int level = 1;
-	int Current_number, Final_Number, Moves;
+	int Starting_Number, Current_number, Final_Number, Moves;
 	bool Operator_Available[5];
 	vector<int> solution; // In solution i will append 1 for subtraction ,2 for addition, 3(*),4(droping digit) and 5 for append digit
 public:
-	Board() : Score(0), Current_Word(""), Current_number(0), Final_Number(0), Moves(0) {}
+	Board() : Current_Word(""), Starting_Number(0), Current_number(0), Final_Number(0), Moves(0), level(0) {}
 	void Set_Board(string Set_Board_Letters) {
-		Set_Board_Letters = "ATEHHDSEVTMFWLIA";
-		for (short i = 0; i < 16; i++) {
+		Set_Board_Letters = "ATEHHDSEVTMFWLIA";		short i = 0;
+		for (short i = 0; i < Num_of_Buttons; i++) {
 			string temp(1, Set_Board_Letters[i]);
 			Alphabets[i].Set_Button(temp.c_str(), { 0, 54, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 0, 0, 0, 255 }, 0);
 		}
-		short i = 0;
-		Alphabets[i].Set_Button("-", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);
-		i++;
-		Alphabets[i].Set_Button("+", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);
-		i++;
-		Alphabets[i].Set_Button("*", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);
-		i++;
-		Alphabets[i].Set_Button("<<", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);
-		i++;
-		Alphabets[i].Set_Button(">>", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);
-		i++;
-		Alphabets[i].Set_Button("Hint", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);
-		i++;
-		Alphabets[i].Set_Button("CLR", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 255,0,0, 255 }, 0);
+		/*0*/Alphabets[i].Set_Button("-", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);		i++;
+		/*1*/Alphabets[i].Set_Button("+", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);		i++;
+		/*2*/Alphabets[i].Set_Button("*", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);		i++;
+		/*3*/Alphabets[i].Set_Button("<<", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 251, 153, 2, 255 }, 0);		i++;
+		/*4*/Alphabets[i].Set_Button(">>", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 251, 153, 2, 255 }, 0);		i++;
+		/*5*/Alphabets[i].Set_Button("Hint", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 204, 0, 204, 255 }, 0);		i++;
+		/*6*/Alphabets[i].Set_Button("CLR", { 0, 0, 255 }, { short(10 + (i % 4) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + 49)) }, { 100,100 }, 100, { 255,0,0, 255 }, 0);
 		Initialize_Level_Values();
 	}
 	void Check_for_Hovering(int x, int y) {
-		for (int i = 0; i < 16; i++)
+		for (short i = 0; i < Num_of_Buttons; i++)
 			Alphabets[i].set_Button_Hovered(Alphabets[i].Check_if_Mouse_in_Button_Area(x, y));
 	}
 	void Reset_Pressed_Letters() {
-		for (int i = 0; i < 16; i++)
-			Alphabets[i].set_Button_Pushed(0);
+		//for (short i = 0; i < Num_of_Buttons; i++)
+			//Alphabets[i].set_Button_Pushed(0);
 		Display_Board();
 	}
 	void Reset_game() {
-		Score = 0;
 		Reset_Pressed_Letters();
 	}
 	void Initialize_Level_Values() {
-		int Current_number = rand() % 11; // Assigning random number to starting variable
+		Current_number = rand() % 11; // Assigning random number to starting variable
+		Starting_Number = Current_number;  //Saving the starting number for level restart/fail
 		int Final_number = Current_number;
-		int value1 = rand() % 2 + 1;  // value which will use for subtraction
-		int value2 = rand() % 11 + 1; // value which will use for addition
-		int value3 = rand() % 5 + 2;  // value which will use for multiplication
-		int value4 = rand() % 10;     // value which will use for append at last
+		int Sub = rand() % 2 + 1;  // value which will use for subtraction
+		int Add = rand() % 11 + 1; // value which will use for addition
 		int temp1 = rand() % 4 + 3;   // Getting random movements to play game
 		Moves = temp1;
 		int finish_number_solution = Current_number;
 
-
-		string tostring = "- " + to_string(value1);
-		Alphabets[0].set_Text_of_button(tostring.c_str());
-		tostring = "+ " + to_string(value2);
-		Alphabets[1].set_Text_of_button(tostring.c_str());
+		string tostring = "- " + to_string(Sub);
+		Alphabets[0].set_Text_of_button(tostring.c_str(), 0);
+		tostring = "+ " + to_string(Add);
+		Alphabets[1].set_Text_of_button(tostring.c_str(), 0);
 		if (level < 6) // for level 1-5
 		{
+			Operator_Available[0] = 1;
+			Operator_Available[1] = 1;
 			if (temp1 > 3)
 			{
 				temp1 = 3;
@@ -295,32 +283,51 @@ public:
 				if (applying_rules == 1)
 				{
 					solution.push_back(1);
-					Final_number -= value1; // subtracting random generated number
+					Final_number -= Sub; // subtracting random generated number
 
 				}
 				else if (applying_rules == 0)
 				{
 					solution.push_back(2);
-					Final_number += value2; // adding random generated number
+					Final_number += Add; // adding random generated number
 				}
 				temp1--;
 			}
 		}
+		int Mul = rand() % 5 + 2;  // value which will use for multiplication
+
+		tostring = "* " + to_string(Mul);
+		Alphabets[2].set_Text_of_button(tostring.c_str(), 0);
+		int Append = rand() % 10;     // value which will use for append at last
+		tostring = "<< " + to_string(Append);
+		Alphabets[3].set_Text_of_button(tostring.c_str(), 0);
+
+		for (int i = 0; i < Moves; i++)
+		{
+			if (solution[i] == 1)
+				cout << "- ";
+			else if (solution[i] == 2)
+				cout << "+ ";
+			else if (solution[i] == 3)
+				cout << "* ";
+			else if (solution[i] == 4)
+				cout << "< "; // for drop digit
+			else if (solution[i] == 5)
+				cout << "> "; // for append digit
+		}
 	}
-	void Game_Level() {
-	
-	}
+	void Game_Level() {	}
 	void Display_Board() {
-		for (int i = 0; i < 16; i++)
+		for (int i = 0; i < Num_of_Buttons; i++)
 			Alphabets[i].Display_Button(0);
 
 		Display_Current_Number();
-		Show_Registered_Words();
 		Display_Current_Word();
-		Display_Score();
+		Display_Level();
+		Display_Moves();
 	}
 	bool Check_for_Letters_input(int x, int y, bool Mousedown_or_up) {//1 for down, 0 for up
-		for (int i = 0; i < 16; i++)
+		for (int i = 0; i < Num_of_Buttons; i++)
 			if (Alphabets[i].Check_if_Mouse_in_Button_Area(x, y))
 			{
 				if (Mousedown_or_up)
@@ -331,7 +338,33 @@ public:
 				else {	//if button released
 					cout << "Operator  " << Alphabets[i].get_text_of_button() << endl;
 					if (Operator_Available[i]) {
-
+						string suffix = Alphabets[i].get_text_of_button().substr(2);
+						if (i == 0) {
+							cout << "got" << suffix << endl;
+							Current_number -= stoi(suffix);
+						}
+						if (i == 1) {
+							cout << "got" << suffix << endl;
+							Current_number += stoi(suffix);
+						}
+						if (i == 2) {
+							cout << "got" << suffix << endl;
+							Current_number *= stoi(suffix);
+						}
+						if (i == 3) { //<<
+							suffix = Alphabets[i].get_text_of_button().substr(3);
+							cout << "got" << suffix << endl;
+							Current_number -= stoi(suffix);
+						}
+						if (i == 4) { //>>
+							suffix = Alphabets[i].get_text_of_button().substr(3);
+							cout << "got" << suffix << endl;
+							Current_number -= stoi(suffix);
+						}
+						if (i == 5) {
+							cout << "got" << suffix << endl;
+							Current_number -= stoi(suffix);
+						}
 					}
 
 
@@ -339,118 +372,6 @@ public:
 				return 1;
 			}
 		return 0;
-	}
-	int Score_Generator(string Word) {
-		switch (Word.size())
-		{
-		case 2:
-		case 3:
-		case 4:
-			return 1;
-		case 5:
-			return 2;
-		case 6:
-			return 3;
-		case 7:
-			return 5;
-		default:
-			return 11;
-		}
-	}
-	void Show_Registered_Words() {
-		static bool new_game = 0;
-		if (Score == 0) {
-			new_game = true;
-			return;
-		}
-		int smallest = INT_MAX; int Longest_String = 0;
-		if (smallest == Longest_String) {
-		}
-		Longest_String++;
-		string text;
-		int i = smallest, number_of_iterations_skiped = 0;
-		Text_Box Registered_Word_list;
-		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-		int x_correction = 0;
-		Registered_Word_list.set_Text_Box("", 30, { 255,255,255, 255 }, { 450,150 }, { 100,324 }, { 43,31,143,0 }, 0);
-		int x = Registered_Word_list.get_Box_Position().X + 5 + x_correction, y = Registered_Word_list.get_Box_Position().Y + 5;
-		COORD org = { x ,y };
-		static int w, h = 0;
-		bool is_First_Word = 1;
-		while (i != Longest_String) {
-			// Get the size of the text
-			TTF_SetFontSize(font, 25);
-			TTF_SetFontStyle(font, TTF_STYLE_NORMAL);
-			TTF_SizeText(font, "", &w, &h);
-			istringstream ss(text);
-			int MAX_horizontal_spacing = 0;	static int Max_Box_Height = y;
-			if (Score == 0 || new_game == 1) {
-				Max_Box_Height = y;
-				new_game = 0;
-			}
-			string word;
-			int correction = 0;
-			Registered_Word_list.Rounding_Radius = 15;
-			while (getline(ss, word, ' ')) {
-
-				SDL_Surface* surface = TTF_RenderText_Blended(font, word.c_str(), { 255,255,255,255 });
-				SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-				SDL_FreeSurface(surface);
-				//if (word.size() <= 4 || is_First_Word) {
-				//	correction = 25;
-				//}
-				//else
-				//	correction = -5;
-				if (is_First_Word || i + 1 == Longest_String)
-					Registered_Word_list.Rounding_Radius = 20;
-				else
-					Registered_Word_list.Rounding_Radius = 0;
-				//if (i != smallest)
-					//is_First_Word = 0;
-				SDL_QueryTexture(texture, NULL, NULL, &w, &h);
-				if (MAX_horizontal_spacing < w)
-					MAX_horizontal_spacing = w;
-				if (Max_Box_Height < y)
-					Max_Box_Height = y;
-				int Box_Width = 100;
-				SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-				if (is_First_Word || i + 1 == Longest_String)
-					Registered_Word_list.Rounding_Radius = 20;
-				else
-					Registered_Word_list.Rounding_Radius = 0;
-				if (i + 1 == Longest_String) {
-					Registered_Word_list.set_Text_Box("", 25, { 255,255,255, 255 }, { short(x - 5),short(y - 5) }, { 90,Max_Box_Height - y + 40 }, { 43,31,143,0 }, 0);
-				}
-				else
-					Registered_Word_list.set_Text_Box("", 25, { 255,255,255, 255 }, { short(x - 5),short(y - 5) }, { 100,Max_Box_Height - y + 40 }, { 43,31,143,0 }, 0);
-				//Registered_Word_list.set_Text_Box("", 30, { 255,255,255, 255 }, { short(x - 5),short(y - 5) }, {100,w + correction }, { 43,31,143,0 }, 0);
-				//boxSIZE: width, height
-				SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-				Registered_Word_list.Display_Text_Box({ 0 }, 0);
-				SDL_Rect rect = { x, y, w, h };
-				//roundedBoxRGBA(renderer, rect.x, rect.y, rect.x + rect.w, rect.y + rect.h, 20, 75, 75, 75, 255);
-				SDL_RenderCopy(renderer, texture, NULL, &rect);
-				y += h;
-				SDL_DestroyTexture(texture);
-			}
-			is_First_Word = 0;
-			Registered_Word_list.Rounding_Radius = 20;
-			if (text != "")
-				x = (x + MAX_horizontal_spacing + 10), y = org.Y;
-			//x = (x + MAX_horizontal_spacing + 4 + i + 2 / 2), y = org.Y;
-					  //x = (x + MAX_horizontal_spacing + i/2), y = org.Y;
-		//else
-			//x = (x + MAX_horizontal_spacing + 4 + i + 2 / 2 + 1), y = org.Y;
-					  //x = (x + MAX_horizontal_spacing + 12), y = org.Y;
-			text = "";
-			i++;
-			MAX_horizontal_spacing = 0;
-			//x_correction = (3 + h);
-			if (x > 840) {
-				SDL_SetWindowSize(window, x + 8, 571);
-				SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-			}
-		}
 	}
 	void Display_Current_Word() const {
 		if (Current_Word == "")
@@ -469,19 +390,35 @@ public:
 		string Temp = to_string(Current_number);
 		Current_Word_Board.set_Text_Box(Temp.c_str(), 32, text_color, position, box_size, box_color, false);
 
-
-
 		//Current_Word_Board.set_Text_Box(Temp.c_str(), 40, { 255,255,255,255 }, { Width / 2,Height / 2 }, { 150,60 }, { 75, 75, 75, 255 }, 0);
 		Current_Word_Board.Display_Text_Box({ 0 }, 0);
 	}
-	void Display_Score() const {
-		static string score_mess;
-		score_mess = "Score " + to_string(Score);
-		static COORD Center;
+	void Display_Level() const {
+		string score_mess;
+		score_mess = "Level " + to_string(level);
+		COORD Center;
 		Center.X = (Alphabets[1].get_Position().X + Alphabets[2].get_Position().X) / 2 - 20;
 		Center.Y = (Alphabets[1].get_Position().Y + Alphabets[2].get_Position().Y) / 2 - 73;
 		Score_Board.set_Text_Box(score_mess.c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
 		Score_Board.Display_Text_Box({ 0 }, 0);
+	}
+	void Display_Moves() const {
+		COORD Center;
+		Center.X = (Alphabets[1].get_Position().X + Alphabets[2].get_Position().X) / 2 - 20;
+		Center.Y = (Alphabets[1].get_Position().Y + Alphabets[2].get_Position().Y) / 2 - 73;
+		Center.Y += 70;
+		Moves_Board.set_Text_Box(("Moves " + to_string(Moves)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
+		Moves_Board.Display_Text_Box({ 0 }, 0);
+	}
+	void Display_Final_Number() const {
+		//string score_mess;
+		//score_mess = ("Moves " + to_string(Moves)).c_str();
+		COORD Center;
+		Center.X = (Alphabets[1].get_Position().X + Alphabets[2].get_Position().X) / 2 - 20;
+		Center.Y = (Alphabets[1].get_Position().Y + Alphabets[2].get_Position().Y) / 2 - 73;
+		Center.Y += 70;
+		Moves_Board.set_Text_Box(("Target " + to_string(Final_Number)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
+		Moves_Board.Display_Text_Box({ 0 }, 0);
 	}
 	void Board_rotate() {
 		char temp[4];
@@ -509,11 +446,10 @@ public:
 		Alphabets[7].set_char_of_button(temp[1]);
 
 	}
-	int get_Game_Score() const { return Score; }
+	//int get_Game_Score() const { return Score; }
 	void New_Game() {
 		Reset_game();
 		Set_Board("ATEHHDSEVTMFWLIA");
-		//Temp = Temp->next;
 	}
 	~Board() {
 	}
@@ -645,13 +581,13 @@ int main(int argc, char* argv[]) {
 
 		Boggle_Game.Display_Board();
 
-		if (Boggle_Game.get_Game_Score() > Game_Player.get_high_score())
-			Game_Player.update_high_Score(Boggle_Game.get_Game_Score()); //updating Player high score at runtime
-		//if (Changes_Made)
-		{
+		//if (Boggle_Game.get_Game_Score() > Game_Player.get_high_score())
+		//	Game_Player.update_high_Score(Boggle_Game.get_Game_Score()); //updating Player high score at runtime
+		////if (Changes_Made)
+		
 			SDL_RenderPresent(renderer);	//Final Output to SDL window
 			//cout << "Printing\n";
-		}
+		
 		//Changes_Made = 0;
 	}
 }
