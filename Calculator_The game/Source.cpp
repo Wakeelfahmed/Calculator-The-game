@@ -202,7 +202,7 @@ public:
 	string get_text_of_button() const { return Main_Text_Box.get_text_for_Box(); }
 	Text_Box get_Main_Text_Box() const { return Main_Text_Box; }
 };
-Text_Box Current_Number_Board, Score_Board, Moves_Board;
+Text_Box Current_Number_Board, Score_Board, Moves_Board, emptyButton1, emptyButton2;
 class Players
 {
 protected:
@@ -219,11 +219,11 @@ public:
 class Board {
 	Button Alphabets[Num_of_Buttons]; //using 1D array as it faster than 2D
 	int level;
-	int Starting_Number, Current_number, Final_Number, Moves;
+	int Starting_Number, Current_number, Final_Number, Moves_Count, Moves;
 	bool Operator_Available[5]{ 0 };
 	vector<int> solution; // In solution i will append 1 for subtraction ,2 for addition, 3(*),4(droping digit) and 5 for append digit
 public:
-	Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves(0), level(1) {}
+	Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(1) {}
 	void Set_Board(string Set_Board_Letters) {
 		Set_Board_Letters = "ATEHHDSEVTMFWLIA";		short intial_Position = 220;
 		for (short i = 0; i < Num_of_Buttons; i++) {
@@ -238,7 +238,9 @@ public:
 		/*3*/Alphabets[i].Set_Button("<<", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 251, 153, 2, 255 }, 0);		i++;
 		/*4*/Alphabets[i].Set_Button(">>", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 251, 153, 2, 255 }, 0);		i++;
 		/*5*/Alphabets[i].Set_Button("Hint", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 46, 228, 52, 255 }, 0);		i++;
-		/*6*/Alphabets[i].Set_Button("CLR", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 255,0,0, 255 }, 0);
+		emptyButton1.set_Text_Box("", 0, { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, { 176, 152, 152, 255 }, 0); i++;
+		/*6*/Alphabets[6].Set_Button("CLR", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 255,0, 0, 255 }, 0); i++;
+		emptyButton2.set_Text_Box("", 0, { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, { 176, 152, 152, 255 }, 0); i++;
 		Initialize_Level_Values();
 	}
 	void Check_for_Hovering(int x, int y) {
@@ -248,8 +250,9 @@ public:
 	void Reset_Pressed_Letters() {
 		Display_Board();
 	}
-	void Reset_game() {
-		Reset_Pressed_Letters();
+	void Restart_level() {
+		Current_number = Starting_Number;
+		Moves_Count = Moves;
 	}
 	void Initialize_Level_Values() {
 		Current_number = rand() % 11; // Assigning random number to starting variable
@@ -258,9 +261,9 @@ public:
 		int Sub = rand() % 2 + 1;  // value which will use for subtraction
 		int Add = rand() % 11 + 1; // value which will use for addition
 		int temp1 = rand() % 4 + 3;   // Getting random movements to play game
-		Moves = temp1;
+		Moves_Count = temp1;
 		int finish_number_solution = Current_number;
-
+		Moves = Moves_Count;
 		string tostring = "-" + to_string(Sub);
 		Alphabets[0].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		tostring = "+" + to_string(Add);
@@ -272,7 +275,7 @@ public:
 			if (temp1 > 3)
 			{
 				temp1 = 3;
-				Moves = temp1;
+				Moves_Count = temp1;
 			}
 			while (temp1 > 0)
 			{
@@ -297,11 +300,12 @@ public:
 
 		tostring = "x" + to_string(Mul);
 		Alphabets[2].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+		//Alphabets[3].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		int Append = rand() % 10;     // value which will use for append at last
-		tostring = "<<" + to_string(Append);
-		Alphabets[3].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+		tostring = ">>" + to_string(Append);
+		Alphabets[4].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 
-		for (int i = 0; i < Moves; i++)
+		for (int i = 0; i < Moves_Count; i++)
 		{
 			if (solution[i] == 1)
 				cout << "- ";
@@ -319,11 +323,12 @@ public:
 	void Display_Board() {
 		for (int i = 0; i < Num_of_Buttons; i++)
 			Alphabets[i].Display_Button(0);
-
+		emptyButton1.Display_Text_Box({ 0 }, 0);
+		emptyButton2.Display_Text_Box({ 0 }, 0);
 		Display_Level();
 		Display_Moves();
 		Display_Final_Number();
-		Display_Current_Number();
+		Display_Current_Number("",150, 0);
 	}
 	bool Check_for_Letters_input(int x, int y, bool Mousedown_or_up) {//1 for down, 0 for up
 		for (int i = 0; i < Num_of_Buttons; i++)
@@ -336,8 +341,12 @@ public:
 				if (Alphabets[i].get_Button_Pushed()) {}
 				else {	//if button released
 					cout << "Operator  " << Alphabets[i].get_text_of_button() << endl;
+					if (i == 6) {
+						Restart_level();
+						return 1;
+					}
 					if (Operator_Available[i] || 1) {
-						Moves--;
+						Moves_Count--;
 						string suffix = Alphabets[i].get_text_of_button().substr(1);
 						if (i == 0) {
 							cout << "got" << suffix << endl;
@@ -354,19 +363,32 @@ public:
 						if (i == 3) { //<<
 							suffix = Alphabets[i].get_text_of_button().substr(2);
 							cout << "got" << suffix << endl;
-							Current_number -= stoi(suffix);
+							Current_number /= 10;
 						}
 						if (i == 4) { //>>
 							suffix = Alphabets[i].get_text_of_button().substr(2);
 							cout << "got" << suffix << endl;
-							Current_number -= stoi(suffix);
+							Current_number = (Current_number * 10) + stoi(suffix); // appending the digit at last
 						}
 						if (i == 5) {
 							cout << "got" << suffix << endl;
-							Current_number -= stoi(suffix);
 						}
 						if (Current_number == Final_Number)
 						{
+							Display_Current_Number("Level Up",140, 1);
+							SDL_RenderPresent(renderer);
+							cout << "lvl up\n";
+							SDL_Delay(950);
+							level++; solution.clear();
+							Initialize_Level_Values();
+						}
+						if (Moves_Count == 0)
+						{
+							Display_Current_Number("Level Falied", 100, 1);
+							SDL_RenderPresent(renderer);
+							cout << "lvl failed\n";
+							SDL_Delay(950);
+							Restart_level();
 						}
 					}
 
@@ -376,15 +398,18 @@ public:
 			}
 		return 0;
 	}
-	void Display_Current_Number() const {
+	void Display_Current_Number(string New_message, short font_size,bool new_message) const {
 		TTF_CloseFont(font);
 		font = TTF_OpenFont("Digital7Monoitalic.ttf", 200);//16  //max : 7332 /1000
 		if (font == NULL)
-			cout << "ERROR!!!\n(Arial.ttf) Font Not Found - unable to render text" << endl;
+			cout << "ERROR!!!\t(Digital7Monoitalic.ttf) Font Not Found - unable to render text" << endl;
 		COORD Center;
 		Center.X = (Width - 370) / 2;
 		Center.Y = 123;
-		Current_Number_Board.set_Text_Box(to_string(Current_number).c_str(), 150, { 255,255,255,255 }, Center, { 370,100 }, { 75, 75, 75, 255 }, 0);
+		if (new_message)
+			Current_Number_Board.set_Text_Box(New_message.c_str(), font_size, { 255,255,255,255 }, Center, { 370,100 }, { 75, 75, 75, 255 }, 0);
+		else
+			Current_Number_Board.set_Text_Box(to_string(Current_number).c_str(), 150, { 255,255,255,255 }, Center, { 370,100 }, { 75, 75, 75, 255 }, 0);
 		Current_Number_Board.Display_Text_Box({ 0 }, 0);
 		TTF_CloseFont(font);
 		font = TTF_OpenFont("arial.ttf", 100);//16  //max : 7332 /1000
@@ -400,7 +425,7 @@ public:
 		COORD Center;
 		Center.X = ((Width - 150) / 2) - 80;
 		Center.Y = 55;		//Center.X -= 80;
-		Moves_Board.set_Text_Box(("Moves " + to_string(Moves)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
+		Moves_Board.set_Text_Box(("Moves " + to_string(Moves_Count)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
 		Moves_Board.Display_Text_Box({ 0 }, 0);
 	}
 	void Display_Final_Number() const {
@@ -437,7 +462,7 @@ public:
 
 	}
 	void New_Game() {
-		Reset_game();
+		Restart_level();
 		Set_Board("ATEHHDSEVTMFWLIA");
 	}
 	~Board() {}
@@ -520,7 +545,7 @@ int main(int argc, char* argv[]) {
 				}
 				else if (Reset_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
 					//RELEASED
-					Boggle_Game.Reset_game();
+					Boggle_Game.Restart_level();
 					Reset_Button.set_Button_Pushed(0);
 					Reset_Button.Display_Text_Button();
 					Changes_Made = 1;
@@ -528,7 +553,7 @@ int main(int argc, char* argv[]) {
 				}
 				else if (New_Game_Button.Check_if_Mouse_in_Button_Area(MouseX, MouseY)) {
 					//RELEASED
-					Boggle_Game.New_Game();
+					//Boggle_Game.New_Game();
 					New_Game_Button.set_Button_Pushed(0);
 					New_Game_Button.Display_Text_Button();
 					Changes_Made = 1;
