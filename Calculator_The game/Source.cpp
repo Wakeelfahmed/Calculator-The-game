@@ -223,7 +223,7 @@ class Board {
 	bool Operator_Available[5]{ 0 };
 	vector<int> solution; // In solution i will append 1 for subtraction ,2 for addition, 3(*),4(droping digit) and 5 for append digit
 public:
-	Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(1) {}
+	Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(4) {}
 	void Set_Board(string Set_Board_Letters) {
 		Set_Board_Letters = "ATEHHDSEVTMFWLIA";		short intial_Position = 220;
 		for (short i = 0; i < Num_of_Buttons; i++) {
@@ -242,6 +242,23 @@ public:
 		/*6*/Alphabets[6].Set_Button("CLR", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, { 255,0, 0, 255 }, 0); i++;
 		emptyButton2.set_Text_Box("", 0, { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, { 176, 152, 152, 255 }, 0); i++;
 		Initialize_Level_Values();
+		Show_Solution();
+	}
+	void Show_Solution() {
+		for (int i = 0; i < Moves_Count; i++)
+		{
+			if (solution[i] == 1)
+				cout << "- ";
+			else if (solution[i] == 2)
+				cout << "+ ";
+			else if (solution[i] == 3)
+				cout << "* ";
+			else if (solution[i] == 4)
+				cout << "< "; // for drop digit
+			else if (solution[i] == 5)
+				cout << "> "; // for append digit
+		}	cout << endl;
+
 	}
 	void Check_for_Hovering(int x, int y) {
 		for (short i = 0; i < Num_of_Buttons; i++)
@@ -255,6 +272,7 @@ public:
 		Moves_Count = Moves;
 	}
 	void Initialize_Level_Values() {
+		srand(time(nullptr)); // function to generate random number every time rand function call
 		Current_number = rand() % 11; // Assigning random number to starting variable
 		Starting_Number = Current_number;  //Saving the starting number for level restart/fail
 		int final_number = Current_number;
@@ -262,8 +280,8 @@ public:
 		int Add = rand() % 11 + 1; // value which will use for addition
 		int temp1 = rand() % 4 + 3;   // Getting random movements to play game
 		Moves_Count = temp1;
-		int finish_number_solution = Current_number;
 		Moves = Moves_Count;
+		int finish_number_solution = Current_number;
 		string tostring = "-" + to_string(Sub);
 		Alphabets[0].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		tostring = "+" + to_string(Add);
@@ -295,28 +313,60 @@ public:
 				temp1--;
 			}
 			Final_Number = final_number;
+			return;
 		}
-		int Mul = rand() % 5 + 2;  // value which will use for multiplication
 
+		int Mul = rand() % 5 + 2;  // value which will use for multiplication
 		tostring = "x" + to_string(Mul);
 		Alphabets[2].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		//Alphabets[3].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		int Append = rand() % 10;     // value which will use for append at last
 		tostring = ">>" + to_string(Append);
-		Alphabets[4].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 
-		for (int i = 0; i < Moves_Count; i++)
+		Alphabets[4].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+		solution.clear();
+
+		if (level < 11) // for level 6-10
 		{
-			if (solution[i] == 1)
-				cout << "- ";
-			else if (solution[i] == 2)
-				cout << "+ ";
-			else if (solution[i] == 3)
-				cout << "* ";
-			else if (solution[i] == 4)
-				cout << "< "; // for drop digit
-			else if (solution[i] == 5)
-				cout << "> "; // for append digit
+			temp1 = 3;
+			Moves_Count = temp1;
+			const int size = 3;
+			int arr[size];
+
+			for (int i = 0; i < size; i++)
+			{
+				int applying_rules = rand() % 3 + 1;
+				arr[i] = applying_rules;
+
+				for (int j = 0; j < i; j++)
+				{
+					while (arr[i] == arr[j])
+					{
+						int applying_rules = rand() % 3 + 1;
+						arr[i] = applying_rules;
+						j = 0;
+					}
+				}
+			}
+			for (int i = 0; i < temp1; i++)
+			{
+				if (arr[i] == 1)
+				{
+					solution.push_back(1);
+					final_number -= Sub; // subtracting random generated number
+				}
+				else if (arr[i] == 2)
+				{
+					solution.push_back(2);
+					final_number += Add; // adding random generated number
+				}
+				else
+				{
+					solution.push_back(3);
+					final_number *= Mul; // multiplying random generated number
+				}
+			}
+			Final_Number = final_number;
 		}
 	}
 	void Game_Level() {	}
@@ -328,7 +378,7 @@ public:
 		Display_Level();
 		Display_Moves();
 		Display_Final_Number();
-		Display_Current_Number("",150, 0);
+		Display_Current_Number("", 150, 0);
 	}
 	bool Check_for_Letters_input(int x, int y, bool Mousedown_or_up) {//1 for down, 0 for up
 		for (int i = 0; i < Num_of_Buttons; i++)
@@ -346,41 +396,44 @@ public:
 						return 1;
 					}
 					if (Operator_Available[i] || 1) {
-						Moves_Count--;
 						string suffix = Alphabets[i].get_text_of_button().substr(1);
 						if (i == 0) {
-							cout << "got" << suffix << endl;
+							//cout << "got" << suffix << endl;
 							Current_number -= stoi(suffix);
 						}
 						if (i == 1) {
-							cout << "got" << suffix << endl;
+							//cout << "got" << suffix << endl;
 							Current_number += stoi(suffix);
 						}
 						if (i == 2) {
-							cout << "got" << suffix << endl;
+							//cout << "got" << suffix << endl;
 							Current_number *= stoi(suffix);
 						}
 						if (i == 3) { //<<
 							suffix = Alphabets[i].get_text_of_button().substr(2);
-							cout << "got" << suffix << endl;
+							//cout << "got" << suffix << endl;
 							Current_number /= 10;
 						}
 						if (i == 4) { //>>
 							suffix = Alphabets[i].get_text_of_button().substr(2);
-							cout << "got" << suffix << endl;
+							//cout << "got" << suffix << endl;
 							Current_number = (Current_number * 10) + stoi(suffix); // appending the digit at last
 						}
 						if (i == 5) {
-							cout << "got" << suffix << endl;
+							//cout << "got" << suffix << endl;
+							cout << "Hint " << solution[Moves-Moves_Count] << endl;
+							return 1;
 						}
+						Moves_Count--;
 						if (Current_number == Final_Number)
 						{
-							Display_Current_Number("Level Up",140, 1);
+							Display_Current_Number("Level Up", 140, 1);
 							SDL_RenderPresent(renderer);
 							cout << "lvl up\n";
 							SDL_Delay(950);
 							level++; solution.clear();
 							Initialize_Level_Values();
+							Show_Solution();
 						}
 						if (Moves_Count == 0)
 						{
@@ -398,7 +451,7 @@ public:
 			}
 		return 0;
 	}
-	void Display_Current_Number(string New_message, short font_size,bool new_message) const {
+	void Display_Current_Number(string New_message, short font_size, bool new_message) const {
 		TTF_CloseFont(font);
 		font = TTF_OpenFont("Digital7Monoitalic.ttf", 200);//16  //max : 7332 /1000
 		if (font == NULL)
@@ -480,7 +533,6 @@ int main(int argc, char* argv[]) {
 	Rotate_Button.Set_Button("Rotate", { 255,255,255,255 }, { 23 + 15,507 }, { 99, 50 }, 40, { 48, 68, 193, 255 }, 0);
 	Reset_Button.Set_Button("Reset", { 255,255,255,255 }, { 23 + 130,507 }, { 99, 50 }, 40, { 48, 68, 193, 255 }, 0);
 	New_Game_Button.Set_Button("New Game", { 255,255,255,255 }, { 23 + 244,507 }, { 140, 50 }, 40, { 255, 128, 0, 255 }, 0);
-	//Invalid_Word_Mess.set_Text_Box("Invalid Word", 40, { 255,255,255,255 }, { 470, 70 }, { 150,60 }, { 255,0,0, 255 }, 0);
 	Players Game_Player;
 	string Player_name;
 	Boggle_Game.New_Game();
