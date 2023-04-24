@@ -1,7 +1,6 @@
 #include"Text_Box.h"
 #include"common.h"
 int Transparency = 120;
-
 TTF_Font* font = TTF_OpenFont("arial.ttf", 100);
 SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Width/*width*/, Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -110,7 +109,7 @@ public:
 	string get_text_of_button() { return Main_Text_Box.get_text_for_Box(); }
 	Text_Box get_Main_Text_Box() const { return Main_Text_Box; }
 };
-Text_Box Current_Number_Board, Score_Board, Moves_Board, emptyButton1, emptyButton2;
+Text_Box Current_Number_Board, Score_Board, Moves_Board, emptyButton1, emptyButton2, Timer_Board;
 #define Num_of_Buttons 7
 class Board {
 	Button Calculator_buttons[Num_of_Buttons]; //using 1D array as it faster than 2D
@@ -118,15 +117,15 @@ class Board {
 	int Starting_Number, Current_number, Final_Number, Moves_Count, Moves;
 	bool Operator_Available[Num_of_Buttons]{ 0 };
 	vector<int> solution; // In solution i will append 1 for subtraction ,2 for addition, 3(*),4(droping digit) and 5 for append digit
+	time_t Start_time, End_time, Timer_Set;
 public:
 	bool Game_Mode;
 	Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(1) {}
-	void Set_Board(string Set_Board_Letters) {
-		Set_Board_Letters = "ATEHHDSEVTMFWLIA";		short intial_Position = 220;
-		for (short i = 0; i < Num_of_Buttons; i++) {
-			string temp(1, Set_Board_Letters[i]);
-			Calculator_buttons[i].Set_Button(temp.c_str(), { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + intial_Position)) }, { 100,100 }, 100, { 0, 0, 0, 255 }, 0);
-		}
+	void Set_Board() {
+		short intial_Position = 220;
+		/*for (short i = 0; i < Num_of_Buttons; i++) {
+			Calculator_buttons[i].Set_Button("", {255, 255, 255}, {short(10 + (i % 3) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + intial_Position))}, {100,100}, 100, {0, 0, 0, 255}, 0);
+		}*/
 		short i = 0;
 		SDL_Color Buttons_Color = { 19 ,19 ,19 };
 		/*0*/Calculator_buttons[i].Set_Button("-", { 255, 255, 255 }, { short(10 + (i % 3) * (100 + 30)), short((10 + (i / 3) * (100 + 10) + intial_Position)) }, { 120,100 }, 80, Buttons_Color, 0);		i++;
@@ -143,7 +142,6 @@ public:
 	}
 	void Show_Solution() {
 		for (int i = 0; i < Moves_Count; i++)
-		{
 			if (solution[i] == 1)
 				cout << "- ";
 			else if (solution[i] == 2)
@@ -154,8 +152,7 @@ public:
 				cout << "< "; // for drop digit
 			else if (solution[i] == 5)
 				cout << "> "; // for append digit
-		}	cout << endl;
-
+		cout << endl;
 	}
 	void Check_for_Hovering(int x, int y) {
 		for (short i = 0; i < Num_of_Buttons; i++)
@@ -167,8 +164,12 @@ public:
 	void Restart_level() {
 		Current_number = Starting_Number;
 		Moves_Count = Moves;
+		if (Game_Mode)
+			Start_time = time(NULL);
 	}
 	void Initialize_Level_Values() {
+		system("CLS");
+		cout << "level " << level << endl;
 		srand(time(nullptr)); // function to generate random number every time rand function call
 		Current_number = rand() % 11; // Assigning random number to starting variable
 		Starting_Number = Current_number;  //Saving the starting number for level restart/fail
@@ -185,8 +186,10 @@ public:
 		Calculator_buttons[0].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
 		tostring = "+" + to_string(Add);
 		Calculator_buttons[1].set_Text_of_button(tostring.c_str(), { 255,255,255 }, 0);
+		Start_time = time(NULL);
 		if (level < 6) // for level 1-5
 		{
+			Timer_Set = 20;
 			Operator_Available[0] = 1; //-
 			Operator_Available[1] = 1; //+
 			Operator_Available[2] = 0; //*
@@ -232,6 +235,7 @@ public:
 
 		if (level < 11) // for level 6-10
 		{
+			Timer_Set = 45;
 			Operator_Available[0] = 1; //-
 			Operator_Available[1] = 1; //+
 			Operator_Available[2] = 1; //*
@@ -278,10 +282,9 @@ public:
 			}
 			Final_Number = final_number;
 		}
-
-
 		else if (level < 16) // for level 11-15
 		{
+			Timer_Set = 70;
 			Operator_Available[0] = 1; //-
 			Operator_Available[1] = 1; //+
 			Operator_Available[2] = 1; //*
@@ -361,6 +364,18 @@ public:
 		Display_Moves();
 		Display_Final_Number();
 		Display_Current_Number("", 150, 0);
+		if (Game_Mode) {
+			End_time = time(NULL);
+			Display_Timer();
+			if (Timer_Set - (End_time - Start_time) == 0) {
+				Display_Current_Number("Time Up", 150, 1);
+				SDL_RenderPresent(renderer);
+				SDL_Delay(950);
+				cout << "Timer Up - Failed\n";
+				Restart_level();
+			}
+
+		}
 	}
 	bool Check_for_Letters_input(int x, int y, bool Mousedown_or_up) {//1 for down, 0 for up
 		for (int i = 0; i < Num_of_Buttons; i++)
@@ -393,22 +408,17 @@ public:
 						return 1;
 					}
 					if (Operator_Available[i]) {
-						cout << "Operator  " << Calculator_buttons[i].get_text_of_button() << endl;
 						string suffix = Calculator_buttons[i].get_text_of_button().substr(1);
 						if (i == 0) {
-							//cout << "got" << suffix << endl;
 							Current_number -= stoi(suffix);
 						}
 						if (i == 1) {
-							//cout << "got" << suffix << endl;
 							Current_number += stoi(suffix);
 						}
 						if (i == 2) {
-							//cout << "got" << suffix << endl;
 							Current_number *= stoi(suffix);
 						}
 						if (i == 3) { //<<
-							suffix = Calculator_buttons[i].get_text_of_button().substr(2);
 							Current_number /= 10;
 						}
 						if (i == 4) { //>>
@@ -449,6 +459,17 @@ public:
 			}
 		return 0;
 	}
+	void Display_Timer() const {
+		COORD Center;
+		//if (Game_Mode)
+		Center.X = ((Width - 150) / 2) - 80;
+		//else
+			//Center.X = (Width - 150) / 2;
+		Center.Y = -13;
+		string timer_left = to_string(Timer_Set - (End_time - Start_time));
+		Timer_Board.set_Text_Box(("Timer " + timer_left).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
+		Timer_Board.Display_Text_Box({ 0 }, 0);
+	}
 	void Display_Current_Number(string New_message, short font_size, bool new_message) const {
 		TTF_CloseFont(font);
 		font = TTF_OpenFont("Digital7Monoitalic.ttf", 200);//16  //max : 7332 /1000
@@ -467,7 +488,10 @@ public:
 	}
 	void Display_Level() const {
 		COORD Center;
-		Center.X = (Width - 150) / 2;
+		if (Game_Mode)
+			Center.X = ((Width - 150) / 2) + 80;
+		else
+			Center.X = (Width - 150) / 2;
 		Center.Y = -13;
 		Score_Board.set_Text_Box(("Level " + to_string(level)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
 		Score_Board.Display_Text_Box({ 0 }, 0);
@@ -488,9 +512,8 @@ public:
 	}
 	void New_Game() {
 		Restart_level();
-		Set_Board("ATEHHDSEVTMFWLIA");
+		Set_Board();
 	}
-	~Board() {}
 };
 int main(int argc, char* argv[]) {
 	SDL_Init(SDL_INIT_VIDEO);
