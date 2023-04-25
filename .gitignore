@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Calculator_The game/Calculator_The game.vcxproj.filters
+/Calculator_The game/Calculator_The game.vcxproj

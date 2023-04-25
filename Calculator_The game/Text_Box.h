@@ -23,8 +23,8 @@
 #include <vector>    // for vector
 
 using namespace std;
-#define Width 405
-#define Height 571
+#define Screen_Width 405
+#define Screen_Height 571
 //SDL_Window* window;
 //SDL_Renderer* renderer;
 struct Size {
