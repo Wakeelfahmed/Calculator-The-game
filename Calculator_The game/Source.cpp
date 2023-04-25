@@ -1,5 +1,5 @@
 #include"common.h"
-#include"Board.h"
+#include"Game.h"
 TTF_Font* font = TTF_OpenFont("arial.ttf", 100);
 SDL_Window* window = SDL_CreateWindow("Calculator: The Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, Screen_Width/*width*/, Screen_Height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -12,8 +12,8 @@ int main(int argc, char* argv[]) {
 		cout << "ERROR!!!\n(Arial.ttf) Font Not Found - unable to render text" << endl;
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_Event event;
-	Board Calculator_Game;
 	srand(time(nullptr)); // function to generate random number every time rand function call
+	Game Calculator_Game;
 	Button Moves_Button, Chrono_Button;
 	Text_Box Play_Game_message;
 	Moves_Button.Set_Button("Moves Mode", { 255,255,255,255 }, { (Screen_Width - 170) / 2 - 95,(Screen_Height - 50) / 2 }, { 170, 50 }, 40, { 48, 68, 193, 255 }, 0);
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
 	while (true) {
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE) {
-				Calculator_Game.~Board();
+				Calculator_Game.~Game();
 				TTF_CloseFont(font);
 				TTF_Quit();
 				SDL_DestroyRenderer(renderer);

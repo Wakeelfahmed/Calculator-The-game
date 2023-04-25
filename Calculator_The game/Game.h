@@ -1,7 +1,7 @@
 #pragma once
 #include "Button.h"
 #define Num_of_Buttons 7
-class Board {
+class Game {
 	Button Calculator_buttons[Num_of_Buttons]; //using 1D array as it faster than 2D
 	int level;
 	int Starting_Number, Current_number, Final_Number, Moves_Count, Moves;
@@ -10,8 +10,8 @@ class Board {
 	time_t Start_time, End_time, Timer_Set;
 	bool Game_Mode;
 public:
-	Board();
-	void Set_Board();
+	Game();
+	void Set_Game_Interface();
 	void Set_Game_Mode(bool Game_Mode);
 	void Show_Solution();
 	void Check_for_Hovering(int x, int y);
@@ -26,5 +26,6 @@ public:
 	void Display_Moves() const;
 	void Display_Final_Number() const;
 	void New_Game();
+	int get_level() const;
 };
 

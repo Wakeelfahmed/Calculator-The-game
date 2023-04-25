@@ -1,7 +1,7 @@
-#include "Board.h"
+#include "Game.h"
 
-Board::Board() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(1) {}
-void Board::Set_Board() {
+Game::Game() : Starting_Number(0), Current_number(0), Final_Number(0), Moves_Count(0), level(15) {}
+void Game::Set_Game_Interface() {
 	short intial_Position = 220;
 	/*for (short i = 0; i < Num_of_Buttons; i++) {
 		Calculator_buttons[i].Set_Button("", {255, 255, 255}, {short(10 + (i % 3) * (100 + 10)), short((10 + (i / 4) * (100 + 10) + intial_Position))}, {100,100}, 100, {0, 0, 0, 255}, 0);
@@ -20,8 +20,8 @@ void Board::Set_Board() {
 	Initialize_Level_Values();
 	Show_Solution();
 }
-void Board::Set_Game_Mode(bool Game_Mode) { this->Game_Mode = Game_Mode; }
-void Board::Show_Solution() {
+void Game::Set_Game_Mode(bool Game_Mode) { this->Game_Mode = Game_Mode; }
+void Game::Show_Solution() {
 	for (int i = 0; i < Moves_Count; i++)
 		if (solution[i] == 1)
 			cout << "- ";
@@ -35,18 +35,18 @@ void Board::Show_Solution() {
 			cout << "> "; // for append digit
 	cout << endl;
 }
-void Board::Check_for_Hovering(int x, int y) {
+void Game::Check_for_Hovering(int x, int y) {
 	for (short i = 0; i < Num_of_Buttons; i++)
 		Calculator_buttons[i].set_Button_Hovered(Calculator_buttons[i].Check_if_Mouse_in_Button_Area(x, y));
 }
-void Board::Reset_Pressed_Letters() {
+void Game::Reset_Pressed_Letters() {
 	Display_Game();
 }
-void Board::Restart_level() {
+void Game::Restart_level() {
 	Current_number = Starting_Number;
 	Moves_Count = Moves;
 }
-void Board::Initialize_Level_Values() {
+void Game::Initialize_Level_Values() {
 	system("CLS");
 	cout << "level " << level << endl;
 	srand(time(nullptr)); // function to generate random number every time rand function call
@@ -241,7 +241,7 @@ void Board::Initialize_Level_Values() {
 		Final_Number = final_number;
 	}
 }
-void Board::Display_Game() {
+void Game::Display_Game() {
 	for (int i = 0; i < Num_of_Buttons; i++)
 		if (Operator_Available[i] == 0)
 			Calculator_buttons[i].Display_Button(1); //blocked, dont show
@@ -296,7 +296,7 @@ void Board::Display_Game() {
 
 	}
 }
-bool Board::Check_for_Letters_input(int x, int y, bool Mousedown_or_up) {//1 for down, 0 for up
+bool Game::Check_for_Letters_input(int x, int y, bool Mousedown_or_up) {//1 for down, 0 for up
 	for (int i = 0; i < Num_of_Buttons; i++)
 		if (Calculator_buttons[i].Check_if_Mouse_in_Button_Area(x, y))
 		{
@@ -381,7 +381,7 @@ bool Board::Check_for_Letters_input(int x, int y, bool Mousedown_or_up) {//1 for
 		}
 	return 0;
 }
-void Board::Display_Timer() const {
+void Game::Display_Timer() const {
 	COORD Center;
 	//if (Game_Mode)
 	Center.X = ((Screen_Width - 150) / 2) - 80;
@@ -392,7 +392,7 @@ void Board::Display_Timer() const {
 	Timer_Board.set_Text_Box(("Timer " + timer_left).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
 	Timer_Board.Display_Text_Box({ 0 }, 0);
 }
-void Board::Display_Current_Number(string New_message, short font_size, bool new_message) const {
+void Game::Display_Current_Number(string New_message, short font_size, bool new_message) const {
 	TTF_CloseFont(font);
 	font = TTF_OpenFont("Digital7Monoitalic.ttf", 200);//16  //max : 7332 /1000
 	if (font == NULL)
@@ -408,7 +408,7 @@ void Board::Display_Current_Number(string New_message, short font_size, bool new
 	TTF_CloseFont(font);
 	font = TTF_OpenFont("arial.ttf", 100);//16  //max : 7332 /1000
 }
-void Board::Display_Level() const {
+void Game::Display_Level() const {
 	COORD Center;
 	if (Game_Mode)
 		Center.X = ((Screen_Width - 150) / 2) + 80;
@@ -418,21 +418,22 @@ void Board::Display_Level() const {
 	Score_Board.set_Text_Box(("Level " + to_string(level)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
 	Score_Board.Display_Text_Box({ 0 }, 0);
 }
-void Board::Display_Moves() const {
+void Game::Display_Moves() const {
 	COORD Center;
 	Center.X = ((Screen_Width - 150) / 2) - 80;
 	Center.Y = 55;		//Center.X -= 80;
 	Moves_Board.set_Text_Box(("Moves " + to_string(Moves_Count)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
 	Moves_Board.Display_Text_Box({ 0 }, 0);
 }
-void Board::Display_Final_Number() const {
+void Game::Display_Final_Number() const {
 	COORD Center;
 	Center.X = ((Screen_Width - 150) / 2) + 80;
 	Center.Y = 55; //Center.X += 80;
 	Moves_Board.set_Text_Box(("Target " + to_string(Final_Number)).c_str(), 40, { 255,255,255,255 }, Center, { 150,60 }, { 75, 75, 75, 255 }, 0);
 	Moves_Board.Display_Text_Box({ 0 }, 0);
 }
-void Board::New_Game() {
+void Game::New_Game() {
 	Restart_level();
-	Set_Board();
+	Set_Game_Interface();
 }
+int Game::get_level() const { return level; }
